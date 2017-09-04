@@ -2,7 +2,6 @@
 
 require "abstract_controller"
 require 'active_support/core_ext/module/attribute_accessors'
-require 'active_support/core_ext/object/blank'
 
 require_relative 'log_subscriber'
 require_relative 'rescuable'
@@ -141,8 +140,8 @@ module Texting
 
     attr_internal :message
 
-    def text(to: , body: )
-      return message if message && headers.blank?
+    def text(to: nil, body: nil)
+      return message if message && to.nil && body.nil?
 
       @_message = TextMessage.new(to: to, body: body)
     end
