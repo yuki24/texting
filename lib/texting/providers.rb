@@ -5,6 +5,7 @@ module Texting
     extend ActiveSupport::Autoload
 
     autoload :Test
+    autoload :Twilio
 
     # Hash object that holds referenses to provider instances.
     PROVIDER_INSTANCES = {}
