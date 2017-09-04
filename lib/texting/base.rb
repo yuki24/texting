@@ -5,11 +5,11 @@ require 'active_support/core_ext/module/attribute_accessors'
 require 'active_support/core_ext/object/blank'
 
 # require 'pushing/log_subscriber'
-# require 'pushing/rescuable'
+require_relative 'rescuable'
 
 module Texting
   class Base < AbstractController::Base
-    # include Rescuable
+    include Rescuable
 
     abstract!
 
