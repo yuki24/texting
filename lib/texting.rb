@@ -6,10 +6,10 @@ module Texting
   extend ::ActiveSupport::Autoload
 
   autoload :Base
-  # autoload :DeliveryJob
+  autoload :DeliveryJob
+  autoload :MessageDelivery
   autoload :Providers
   autoload :TextMessage
-  autoload :MessageDelivery
 end
 
 if defined?(Rails)

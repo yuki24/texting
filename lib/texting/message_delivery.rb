@@ -29,7 +29,7 @@ module Texting
     end
 
     def deliver_later!(options = {})
-      message.process { enqueue_delivery :deliver_now!, options }
+      enqueue_delivery :deliver_now!, options
     end
 
     def deliver_now!
