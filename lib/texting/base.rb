@@ -40,7 +40,7 @@ module Texting
     @@delivery_interceptors = []
 
     class << self
-      # delegate :deliveries, :deliveries=, to: Pushing::Adapters::TestAdapter
+      delegate :deliveries, :deliveries=, to: Texting::Providers::Test
 
       # Register one or more Observers which will be notified when a text message is delivered.
       def register_observers(*observers)

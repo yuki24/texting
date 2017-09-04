@@ -7,7 +7,7 @@ require 'texters/base_texter'
 
 class BaseTest < ActiveSupport::TestCase
   setup do
-    # BaseNotifier.deliveries.clear
+    BaseTexter.deliveries.clear
   end
 
   test "method call to texter does not raise error" do

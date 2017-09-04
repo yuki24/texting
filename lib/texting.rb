@@ -7,6 +7,7 @@ module Texting
 
   autoload :Base
   # autoload :DeliveryJob
+  autoload :Providers
   autoload :TextMessage
   autoload :MessageDelivery
 end
