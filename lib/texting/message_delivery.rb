@@ -43,7 +43,7 @@ module Texting
 
       response = nil
       @texter_class.deliver_message(self) do
-        response = Adapters.instance(@texter_class.config).deliver!(message)
+        response = Providers.instance(@texter_class.config).deliver!(message)
       end
 
       @texter_class.inform_observers(self, response)
