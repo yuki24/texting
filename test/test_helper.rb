@@ -34,3 +34,5 @@ rescue LoadError
   require 'active_support/test_case'
   ActiveSupport::TestCase.test_order = :sorted
 end
+
+Texting::Base.config.provider = :test

@@ -28,17 +28,16 @@ class BaseTest < ActiveSupport::TestCase
     assert_equal 'Welcome!',     message.body
   end
 
-  # test "should be able to render only with a single service" do
-    # BaseNotifier.with_apn_template.deliver_now!
-    # assert_equal 1, BaseNotifier.deliveries.length
-    # assert_equal 1, BaseNotifier.deliveries.apn.length
-    # assert_equal 0, BaseNotifier.deliveries.fcm.length
+  test "should be able to render only with a single service" do
+    BaseTexter.welcome.deliver_now!
 
-    # BaseNotifier.with_fcm_template.deliver_now!
-    # assert_equal 2, BaseNotifier.deliveries.length
-    # assert_equal 1, BaseNotifier.deliveries.apn.length
-    # assert_equal 1, BaseNotifier.deliveries.fcm.length
-  # end
+    assert_equal 1, BaseTexter.deliveries.length
+
+    message = BaseTexter.deliveries.last
+
+    assert_equal '909-390-0003', message.to
+    assert_equal 'Welcome!',     message.body
+  end
 
   # test "should not render if apn device token is falsy" do
     # BaseNotifier.with_no_apn_device_token.deliver_now!
