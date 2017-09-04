@@ -4,7 +4,7 @@ require "abstract_controller"
 require 'active_support/core_ext/module/attribute_accessors'
 require 'active_support/core_ext/object/blank'
 
-# require 'pushing/log_subscriber'
+require_relative 'log_subscriber'
 require_relative 'rescuable'
 
 module Texting
@@ -13,7 +13,6 @@ module Texting
 
     abstract!
 
-    # include AbstractController::Rendering
     include AbstractController::Logger
     include AbstractController::Helpers
     include AbstractController::Translation
@@ -101,7 +100,7 @@ module Texting
 
       def set_payload_for_message(payload, message)
         payload[:texter]  = name
-        payload[:message] = message.body
+        payload[:message] = message
       end
 
       def method_missing(method_name, *args)
