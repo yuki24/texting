@@ -39,197 +39,170 @@ class BaseTest < ActiveSupport::TestCase
     assert_equal 'Welcome!',     message.body
   end
 
-  # test "should not render if apn device token is falsy" do
-    # BaseNotifier.with_no_apn_device_token.deliver_now!
-    # assert_equal 0, BaseNotifier.deliveries.length
-    # assert_equal 0, BaseNotifier.deliveries.apn.length
-    # assert_equal 0, BaseNotifier.deliveries.fcm.length
-  # end
+  test "Text message is not delivered when the text method was never called" do
+    assert_no_changes -> { BaseTexter.deliveries.size } do
+      BaseTexter.without_text_call.deliver_now!
+    end
+  end
 
-  # test "calling deliver on the action should increment the deliveries collection if using the test notifier" do
-    # BaseNotifier.welcome.deliver_now!
-    # assert_equal 2, BaseNotifier.deliveries.length
-    # assert_equal 1, BaseNotifier.deliveries.apn.length
-    # assert_equal 1, BaseNotifier.deliveries.fcm.length
-  # end
+  test "texter can be anonymous" do
+    texter = Class.new(Texting::Base) do
+      def welcome
+        text to: '909-390-0003', body: 'I am anonymous'
+      end
+    end
 
-  # test "should raise if missing template" do
-    # assert_raises ActionView::MissingTemplate do
-      # BaseNotifier.missing_apn_template.deliver_now!
-    # end
-    # assert_raises ActionView::MissingTemplate do
-      # BaseNotifier.missing_fcm_template.deliver_now!
-    # end
+    assert_equal "anonymous",      texter.texter_name
+    assert_equal "I am anonymous", texter.welcome.body
+  end
 
-    # assert_equal 0, BaseNotifier.deliveries.length
-  # end
+  # Before and After hooks
 
-  # test "the view is not rendered when notification was never called" do
-    # notification = BaseNotifier.without_push_call
-    # notification.deliver_now!
+  class MyObserver
+    def self.delivered_message(message, response)
+    end
+  end
 
-    # assert_nil notification.apn
-    # assert_nil notification.fcm
-  # end
+  class MySecondObserver
+    def self.delivered_message(message, response)
+    end
+  end
 
-  # test "the return value of notifier methods is not relevant" do
-    # notification = BaseNotifier.with_nil_as_return_value
+  test "you can register an observer to the texter object that gets informed on message delivery" do
+    message_side_effects do
+      Texting::Base.register_observer(MyObserver)
+      message = BaseTexter.welcome
 
-    # apn_payload = {
-      # aps: {
-        # alert: "New message!",
-      # }
-    # }
+      assert_called_with(MyObserver, :delivered_message, [message, message]) do
+        message.deliver_now!
+      end
+    end
+  end
 
-    # assert_equal apn_payload, notification.apn.payload
-    # assert_equal 'device-token', notification.apn.device_token
+  def message_side_effects
+    old_observers = Texting::Base.class_variable_get(:@@delivery_message_observers)
+    old_delivery_interceptors = Texting::Base.class_variable_get(:@@delivery_interceptors)
+    yield
+  ensure
+    Texting::Base.class_variable_set(:@@delivery_message_observers, old_observers)
+    Texting::Base.class_variable_set(:@@delivery_interceptors, old_delivery_interceptors)
+  end
 
-    # notification.deliver_now!
-  # end
+  test "you can register multiple observers to the message object that both get informed on message delivery" do
+    message_side_effects do
+      Texting::Base.register_observers(BaseTest::MyObserver, MySecondObserver)
+      message = BaseTexter.welcome
 
-  # # Before and After hooks
+      assert_called_with(MyObserver, :delivered_message, [message, message]) do
+        assert_called_with(MySecondObserver, :delivered_message, [message, message]) do
+          message.deliver_now!
+        end
+      end
+    end
+  end
 
-  # class MyObserver
-    # def self.delivered_notification(notification, response)
-    # end
-  # end
+  class MyInterceptor
+    def self.delivering_message(message); end
+    def self.previewing_message(message); end
+  end
 
-  # class MySecondObserver
-    # def self.delivered_notification(notification, response)
-    # end
-  # end
+  class MySecondInterceptor
+    def self.delivering_message(message); end
+    def self.previewing_message(message); end
+  end
 
-  # test "you can register an observer to the notifier object that gets informed on notification delivery" do
-    # notification_side_effects do
-      # Pushing::Base.register_observer(MyObserver)
-      # notification = BaseNotifier.with_apn_template
-      # assert_called_with(MyObserver, :delivered_notification, [notification, notification.apn]) do
-        # notification.deliver_now!
-      # end
-    # end
-  # end
+  test "you can register an interceptor to the message object that gets passed the message object before delivery" do
+    message_side_effects do
+      Texting::Base.register_interceptor(MyInterceptor)
+      message = BaseTexter.welcome
 
-  # def notification_side_effects
-    # old_observers = Pushing::Base.class_variable_get(:@@delivery_notification_observers)
-    # old_delivery_interceptors = Pushing::Base.class_variable_get(:@@delivery_interceptors)
-    # yield
-  # ensure
-    # Pushing::Base.class_variable_set(:@@delivery_notification_observers, old_observers)
-    # Pushing::Base.class_variable_set(:@@delivery_interceptors, old_delivery_interceptors)
-  # end
+      assert_called_with(MyInterceptor, :delivering_message, [message]) do
+        message.deliver_now!
+      end
+    end
+  end
 
-  # test "you can register multiple observers to the notification object that both get informed on notification delivery" do
-    # notification_side_effects do
-      # Pushing::Base.register_observers(BaseTest::MyObserver, MySecondObserver)
-      # notification = BaseNotifier.with_apn_template
-      # assert_called_with(MyObserver, :delivered_notification, [notification, notification.apn]) do
-        # assert_called_with(MySecondObserver, :delivered_notification, [notification, notification.apn]) do
-          # notification.deliver_now!
-        # end
-      # end
-    # end
-  # end
+  test "you can register multiple interceptors to the message object that both get passed the message object before delivery" do
+    message_side_effects do
+      Texting::Base.register_interceptors(BaseTest::MyInterceptor, MySecondInterceptor)
+      message = BaseTexter.welcome
 
-  # class MyInterceptor
-    # def self.delivering_notification(notification); end
-    # def self.previewing_notification(notification); end
-  # end
+      assert_called_with(MyInterceptor, :delivering_message, [message]) do
+        assert_called_with(MySecondInterceptor, :delivering_message, [message]) do
+          message.deliver_now!
+        end
+      end
+    end
+  end
 
-  # class MySecondInterceptor
-    # def self.delivering_notification(notification); end
-    # def self.previewing_notification(notification); end
-  # end
+  test "modifying the message with a before_action" do
+    class BeforeActionTexter < Texting::Base
+      before_action :filter
 
-  # test "you can register an interceptor to the notification object that gets passed the notification object before delivery" do
-    # notification_side_effects do
-      # Pushing::Base.register_interceptor(MyInterceptor)
-      # notification = BaseNotifier.welcome
-      # assert_called_with(MyInterceptor, :delivering_notification, [notification]) do
-        # notification.deliver_now!
-      # end
-    # end
-  # end
+      def welcome ; message ; end
 
-  # test "you can register multiple interceptors to the notification object that both get passed the notification object before delivery" do
-    # notification_side_effects do
-      # Pushing::Base.register_interceptors(BaseTest::MyInterceptor, MySecondInterceptor)
-      # notification = BaseNotifier.welcome
-      # assert_called_with(MyInterceptor, :delivering_notification, [notification]) do
-        # assert_called_with(MySecondInterceptor, :delivering_notification, [notification]) do
-          # notification.deliver_now!
-        # end
-      # end
-    # end
-  # end
+      cattr_accessor :called
+      self.called = false
 
-  # test "modifying the notification message with a before_action" do
-    # class BeforeActionNotifier < Pushing::Base
-      # before_action :filter
+      private
+      def filter
+        self.class.called = true
+      end
+    end
 
-      # def welcome ; notification ; end
+    BeforeActionTexter.welcome.message
 
-      # cattr_accessor :called
-      # self.called = false
+    assert BeforeActionTexter.called, "Before action didn't get called."
+  end
 
-      # private
-      # def filter
-        # self.class.called = true
-      # end
-    # end
+  test "modifying the message with an after_action" do
+    class AfterActionTexter < Texting::Base
+      after_action :filter
 
-    # BeforeActionNotifier.welcome.message
+      def welcome ; message ; end
 
-    # assert BeforeActionNotifier.called, "Before action didn't get called."
-  # end
+      cattr_accessor :called
+      self.called = false
 
-  # test "modifying the notification message with an after_action" do
-    # class AfterActionNotifier < Pushing::Base
-      # after_action :filter
+      private
+      def filter
+        self.class.called = true
+      end
+    end
 
-      # def welcome ; notification ; end
+    AfterActionTexter.welcome.message
 
-      # cattr_accessor :called
-      # self.called = false
+    assert AfterActionTexter.called, "After action didn't get called."
+  end
 
-      # private
-      # def filter
-        # self.class.called = true
-      # end
-    # end
+  test "action methods should be refreshed after defining new method" do
+    class FooTexter < Texting::Base
+      # This triggers action_methods.
+      respond_to?(:foo)
 
-    # AfterActionNotifier.welcome.message
+      def notify
+      end
+    end
 
-    # assert AfterActionNotifier.called, "After action didn't get called."
-  # end
+    assert_equal Set.new(["notify"]), FooTexter.action_methods
+  end
 
-  # test "action methods should be refreshed after defining new method" do
-    # class FooNotifier < Pushing::Base
-      # # This triggers action_methods.
-      # respond_to?(:foo)
+  test "message for process" do
+    begin
+      events = []
+      ActiveSupport::Notifications.subscribe("process.text_message") do |*args|
+        events << ActiveSupport::Notifications::Event.new(*args)
+      end
 
-      # def notify
-      # end
-    # end
+      BaseTexter.welcome.deliver_now!
 
-    # assert_equal Set.new(["notify"]), FooNotifier.action_methods
-  # end
-
-  # test "notification for process" do
-    # begin
-      # events = []
-      # ActiveSupport::Notifications.subscribe("process.push_notification") do |*args|
-        # events << ActiveSupport::Notifications::Event.new(*args)
-      # end
-
-      # BaseNotifier.welcome.deliver_now!
-
-      # assert_equal 1, events.length
-      # assert_equal "process.push_notification", events[0].name
-      # assert_equal "BaseNotifier", events[0].payload[:notifier]
-      # assert_equal :welcome, events[0].payload[:action]
-      # assert_equal [], events[0].payload[:args]
-    # ensure
-      # ActiveSupport::Notifications.unsubscribe "process.push_notification"
-    # end
-  # end
+      assert_equal 1, events.length
+      assert_equal "process.text_message", events[0].name
+      assert_equal "BaseTexter", events[0].payload[:texter]
+      assert_equal :welcome, events[0].payload[:action]
+      assert_equal [], events[0].payload[:args]
+    ensure
+      ActiveSupport::Notifications.unsubscribe "process.text_message"
+    end
+  end
 end

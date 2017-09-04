@@ -29,11 +29,11 @@ module Texting
     end
 
     def deliver_later!(options = {})
-      enqueue_delivery :deliver_now!, options
+      message.process { enqueue_delivery :deliver_now!, options }
     end
 
     def deliver_now!
-      processed_texter.handle_exceptions { do_deliver }
+      message.process { processed_texter.handle_exceptions { do_deliver } }
     end
 
     private
