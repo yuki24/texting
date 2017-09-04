@@ -13,5 +13,5 @@ module Texting
 end
 
 if defined?(Rails)
-  # require 'texting/railtie'
+  require 'texting/railtie'
 end
