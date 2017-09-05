@@ -31,7 +31,7 @@ module Texting
       # +config+.
       def instance(config)
         PROVIDER_INSTANCES[config.provider] || MUTEX.synchronize do
-          PROVIDER_INSTANCES[config.provider] ||= lookup(config.provider).new(config)
+          PROVIDER_INSTANCES[config.provider] ||= lookup(config.provider).new(config[:"#{config.provider}_settings"])
         end
       end
     end
