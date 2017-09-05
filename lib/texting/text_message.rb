@@ -1,9 +1,9 @@
 module Texting
   class TextMessage
-    attr_accessor :to, :body
+    attr_accessor :from, :to, :body, :options
 
-    def initialize(to:, body: )
-      @to, @body = to, body
+    def initialize(from: , to: , body: , **options)
+      @from, @to, @body, @options = from, to, body, options
     end
 
     def process

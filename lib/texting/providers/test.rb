@@ -16,4 +16,3 @@ module Texting
     end
   end
 end
-

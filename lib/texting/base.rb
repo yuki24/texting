@@ -37,6 +37,9 @@ module Texting
     cattr_reader :delivery_interceptors
     @@delivery_interceptors = []
 
+    class_attribute :default_params
+    self.default_params = {}.freeze
+
     class << self
       delegate :deliveries, :deliveries=, to: Texting::Providers::Test
 
@@ -86,6 +89,20 @@ module Texting
       # Allows to set the name of current texter.
       attr_writer :texter_name
       alias :controller_path :texter_name
+
+      # Sets the defaults through app configuration:
+      #
+      #     config.action_mailer.default from: "909-390-0003"
+      #
+      # Aliased by ::default_options=
+      def default(value = nil)
+        self.default_params = default_params.merge(value).freeze if value
+        default_params
+      end
+      # Allows to set defaults through app configuration:
+      #
+      #    config.action_mailer.default_options = { from: "909-390-0003" }
+      alias :default_options= :default
 
       # Wraps a text message delivery inside of <tt>ActiveSupport::Notifications</tt> instrumentation.
       def deliver_message(message) #:nodoc:
@@ -143,10 +160,9 @@ module Texting
     def text(to: nil, body: nil)
       return message if message && to.nil && body.nil?
 
-      @_message = TextMessage.new(to: to, body: body)
+      @_message = TextMessage.new(to: to, body: body, **self.class.default)
     end
 
     ActiveSupport.run_load_hooks(:texting, self)
   end
 end
-

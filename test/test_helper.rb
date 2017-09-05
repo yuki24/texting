@@ -36,3 +36,6 @@ rescue LoadError
 end
 
 Texting::Base.config.provider = :test
+Texting::Base.default_options = {
+  from: '909-390-0003'
+}
