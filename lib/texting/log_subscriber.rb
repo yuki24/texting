@@ -1,3 +1,5 @@
+# frozen-string-literal: true
+
 require "active_support/log_subscriber"
 
 module Texting
@@ -10,12 +12,12 @@ module Texting
 
       message = event.payload[:message]
       info do
-        "  SMS: sent text message to #{message.to} (#{event.duration.round(1)}ms)"
+        "  #{colorize("SMS (#{event.duration.round(1)}ms)")} #{colorize("sent text message to #{message.to} from #{message.from}", style: "0;1")}"
       end
 
       return unless logger.debug?
       debug do
-        "  message:\n  #{message.body}\n"
+        "  #{colorize("Message:")}\n    #{message.body}\n"
       end
     end
 
@@ -34,6 +36,12 @@ module Texting
     # Use the logger configured for Texting::Base.
     def logger
       Texting::Base.logger
+    end
+
+    private
+
+    def colorize(message, style: '32;1')
+      "\e[#{style}m#{message}\e[0m"
     end
   end
 end
