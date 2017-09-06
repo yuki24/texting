@@ -6,6 +6,7 @@ module Texting
 
     autoload :Test
     autoload :Twilio
+    autoload :AwsSns
 
     # Hash object that holds referenses to provider instances.
     PROVIDER_INSTANCES = {}
