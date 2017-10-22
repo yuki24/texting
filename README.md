@@ -19,10 +19,14 @@ gem 'texting'
 
 ### Supported Providers
 
-Pushing itself doesn't send text messages. Instead, it uses an adapter to actually send them. As of writing, Texting only have support for Twilio:
+Pushing itself doesn't send text messages. Instead, it uses an adapter to actually send them. As of writing, Texting only have support for Twilio and AWS SNS:
 
 ```ruby
+# Use Twilio:
 gem 'twilio-ruby'
+
+# Use AWS SNS:
+gem 'aws-sdk-sns'
 ```
 
 Support for other providers will be added in the future.
