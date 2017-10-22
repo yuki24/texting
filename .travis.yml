@@ -1,5 +1,24 @@
 sudo: false
 language: ruby
-rvm:
-  - 2.4.1
 before_install: gem install bundler -v 1.15.4
+
+rvm:
+  - 2.2.8
+  - 2.3.5
+  - 2.4.2
+  - ruby-head
+  - jruby-9.1.13.0
+  - jruby-head
+
+gemfile:
+  - gemfiles/rails_42.gemfile
+  - gemfiles/rails_50.gemfile
+  - gemfiles/rails_51.gemfile
+  - gemfiles/rails_edge.gemfile
+
+matrix:
+  allow_failures:
+    - rvm: ruby-head
+    - rvm: jruby-9.1.13.0
+    - rvm: jruby-head
+    - gemfile: gemfiles/rails_edge.gemfile
