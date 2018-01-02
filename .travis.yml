@@ -3,11 +3,11 @@ language: ruby
 before_install: gem install bundler -v 1.15.4
 
 rvm:
-  - 2.2.8
-  - 2.3.5
-  - 2.4.2
+  - 2.5.0
+  - 2.4.3
+  - 2.2.9
   - ruby-head
-  - jruby-9.1.13.0
+  - jruby-9.1.15.0
   - jruby-head
 
 gemfile:
@@ -19,6 +19,6 @@ gemfile:
 matrix:
   allow_failures:
     - rvm: ruby-head
-    - rvm: jruby-9.1.13.0
+    - rvm: jruby-9.1.15.0
     - rvm: jruby-head
     - gemfile: gemfiles/rails_edge.gemfile
