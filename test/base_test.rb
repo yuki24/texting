@@ -40,8 +40,14 @@ class BaseTest < ActiveSupport::TestCase
   end
 
   test "Text message is not delivered when the text method was never called" do
-    assert_no_changes -> { BaseMessenger.deliveries.size } do
-      BaseMessenger.without_text_call.deliver_now!
+    if respond_to?(:assert_no_changes)
+      assert_no_changes -> { BaseMessenger.deliveries.size } do
+        BaseMessenger.without_text_call.deliver_now!
+      end
+    else
+      assert_no_difference -> { BaseMessenger.deliveries.size } do
+        BaseMessenger.without_text_call.deliver_now!
+      end
     end
   end
 
