@@ -15,6 +15,7 @@ module Texting
     include AbstractController::Logger
     include AbstractController::Helpers
     include AbstractController::Translation
+    include AbstractController::AssetPaths
     include AbstractController::Callbacks
     begin
       include AbstractController::Caching
@@ -110,6 +111,11 @@ module Texting
           set_payload_for_message(payload, message)
           yield # Let MessageDelivery do the delivery actions
         end
+      end
+
+      # Push notifications do not support relative path links.
+      def supports_path? # :doc:
+        false
       end
 
       private
