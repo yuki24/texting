@@ -6,6 +6,12 @@ appraise "rails_edge" do
   end
 end
 
+appraise "rails_52" do
+  gem "railties", '~> 5.2.0.rc1'
+  gem "actionpack", '~> 5.2.0.rc1'
+  gem "activejob", '~> 5.2.0.rc1'
+end
+
 appraise "rails_51" do
   gem "railties", '~> 5.1.0'
   gem "actionpack", '~> 5.1.0'
