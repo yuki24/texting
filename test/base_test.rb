@@ -3,57 +3,57 @@ require "set"
 require "action_dispatch"
 require "active_support/time"
 
-require 'texters/base_texter'
+require 'messengers/base_messenger'
 
 class BaseTest < ActiveSupport::TestCase
   setup do
-    BaseTexter.deliveries.clear
+    BaseMessenger.deliveries.clear
   end
 
-  test "method call to texter does not raise error" do
-    assert_nothing_raised { BaseTexter.welcome }
+  test "method call to messenger does not raise error" do
+    assert_nothing_raised { BaseMessenger.welcome }
   end
 
   # Class level API with method missing
   test "should respond to action methods" do
-    assert_respond_to BaseTexter, :welcome
-    assert_not BaseTexter.respond_to?(:text)
+    assert_respond_to BaseMessenger, :welcome
+    assert_not BaseMessenger.respond_to?(:text)
   end
 
   # Basic usage without block
   test "push() should set the device tokens and generate json payload" do
-    message = BaseTexter.welcome
+    message = BaseMessenger.welcome
 
     assert_equal '909-390-0003', message.to
     assert_equal 'Welcome!',     message.body
   end
 
   test "should be able to render only with a single service" do
-    BaseTexter.welcome.deliver_now!
+    BaseMessenger.welcome.deliver_now!
 
-    assert_equal 1, BaseTexter.deliveries.length
+    assert_equal 1, BaseMessenger.deliveries.length
 
-    message = BaseTexter.deliveries.last
+    message = BaseMessenger.deliveries.last
 
     assert_equal '909-390-0003', message.to
     assert_equal 'Welcome!',     message.body
   end
 
   test "Text message is not delivered when the text method was never called" do
-    assert_no_changes -> { BaseTexter.deliveries.size } do
-      BaseTexter.without_text_call.deliver_now!
+    assert_no_changes -> { BaseMessenger.deliveries.size } do
+      BaseMessenger.without_text_call.deliver_now!
     end
   end
 
-  test "texter can be anonymous" do
-    texter = Class.new(Texting::Base) do
+  test "messenger can be anonymous" do
+    messenger = Class.new(Texting::Base) do
       def welcome
         text to: '909-390-0003', body: 'I am anonymous'
       end
     end
 
-    assert_equal "anonymous",      texter.texter_name
-    assert_equal "I am anonymous", texter.welcome.body
+    assert_equal "anonymous",      messenger.messenger_name
+    assert_equal "I am anonymous", messenger.welcome.body
   end
 
   # Before and After hooks
@@ -68,10 +68,10 @@ class BaseTest < ActiveSupport::TestCase
     end
   end
 
-  test "you can register an observer to the texter object that gets informed on message delivery" do
+  test "you can register an observer to the messenger object that gets informed on message delivery" do
     message_side_effects do
       Texting::Base.register_observer(MyObserver)
-      message = BaseTexter.welcome
+      message = BaseMessenger.welcome
 
       assert_called_with(MyObserver, :delivered_message, [message, message]) do
         message.deliver_now!
@@ -91,7 +91,7 @@ class BaseTest < ActiveSupport::TestCase
   test "you can register multiple observers to the message object that both get informed on message delivery" do
     message_side_effects do
       Texting::Base.register_observers(BaseTest::MyObserver, MySecondObserver)
-      message = BaseTexter.welcome
+      message = BaseMessenger.welcome
 
       assert_called_with(MyObserver, :delivered_message, [message, message]) do
         assert_called_with(MySecondObserver, :delivered_message, [message, message]) do
@@ -114,7 +114,7 @@ class BaseTest < ActiveSupport::TestCase
   test "you can register an interceptor to the message object that gets passed the message object before delivery" do
     message_side_effects do
       Texting::Base.register_interceptor(MyInterceptor)
-      message = BaseTexter.welcome
+      message = BaseMessenger.welcome
 
       assert_called_with(MyInterceptor, :delivering_message, [message]) do
         message.deliver_now!
@@ -125,7 +125,7 @@ class BaseTest < ActiveSupport::TestCase
   test "you can register multiple interceptors to the message object that both get passed the message object before delivery" do
     message_side_effects do
       Texting::Base.register_interceptors(BaseTest::MyInterceptor, MySecondInterceptor)
-      message = BaseTexter.welcome
+      message = BaseMessenger.welcome
 
       assert_called_with(MyInterceptor, :delivering_message, [message]) do
         assert_called_with(MySecondInterceptor, :delivering_message, [message]) do
@@ -136,7 +136,7 @@ class BaseTest < ActiveSupport::TestCase
   end
 
   test "modifying the message with a before_action" do
-    class BeforeActionTexter < Texting::Base
+    class BeforeActionMessenger < Texting::Base
       before_action :filter
 
       def welcome ; message ; end
@@ -150,13 +150,13 @@ class BaseTest < ActiveSupport::TestCase
       end
     end
 
-    BeforeActionTexter.welcome.message
+    BeforeActionMessenger.welcome.message
 
-    assert BeforeActionTexter.called, "Before action didn't get called."
+    assert BeforeActionMessenger.called, "Before action didn't get called."
   end
 
   test "modifying the message with an after_action" do
-    class AfterActionTexter < Texting::Base
+    class AfterActionMessenger < Texting::Base
       after_action :filter
 
       def welcome ; message ; end
@@ -170,13 +170,13 @@ class BaseTest < ActiveSupport::TestCase
       end
     end
 
-    AfterActionTexter.welcome.message
+    AfterActionMessenger.welcome.message
 
-    assert AfterActionTexter.called, "After action didn't get called."
+    assert AfterActionMessenger.called, "After action didn't get called."
   end
 
   test "action methods should be refreshed after defining new method" do
-    class FooTexter < Texting::Base
+    class FooMessenger < Texting::Base
       # This triggers action_methods.
       respond_to?(:foo)
 
@@ -184,7 +184,7 @@ class BaseTest < ActiveSupport::TestCase
       end
     end
 
-    assert_equal Set.new(["notify"]), FooTexter.action_methods
+    assert_equal Set.new(["notify"]), FooMessenger.action_methods
   end
 
   test "message for process" do
@@ -194,11 +194,11 @@ class BaseTest < ActiveSupport::TestCase
         events << ActiveSupport::Notifications::Event.new(*args)
       end
 
-      BaseTexter.welcome.deliver_now!
+      BaseMessenger.welcome.deliver_now!
 
       assert_equal 1, events.length
       assert_equal "process.text_message", events[0].name
-      assert_equal "BaseTexter", events[0].payload[:texter]
+      assert_equal "BaseMessenger", events[0].payload[:messenger]
       assert_equal :welcome, events[0].payload[:action]
       assert_equal [], events[0].payload[:args]
     ensure

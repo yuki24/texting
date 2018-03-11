@@ -1,4 +1,4 @@
-class BaseTexter < Texting::Base
+class BaseMessenger < Texting::Base
   def welcome(hash = {})
     text to: '909-390-0003', body: 'Welcome!'
   end

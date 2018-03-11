@@ -29,7 +29,7 @@ module Texting
     end
 
     cattr_accessor :deliver_later_queue_name
-    self.deliver_later_queue_name = :texters
+    self.deliver_later_queue_name = :messengers
 
     cattr_reader :delivery_message_observers
     @@delivery_message_observers = []
@@ -83,12 +83,12 @@ module Texting
         end
       end
 
-      def texter_name
-        @texter_name ||= anonymous? ? "anonymous" : name.underscore
+      def messenger_name
+        @messenger_name ||= anonymous? ? "anonymous" : name.underscore
       end
-      # Allows to set the name of current texter.
-      attr_writer :texter_name
-      alias :controller_path :texter_name
+      # Allows to set the name of current messenger.
+      attr_writer :messenger_name
+      alias :controller_path :messenger_name
 
       # Sets the defaults through app configuration:
       #
@@ -115,7 +115,7 @@ module Texting
       private
 
       def set_payload_for_message(payload, message)
-        payload[:texter]  = name
+        payload[:messenger]  = name
         payload[:message] = message
       end
 
@@ -134,7 +134,7 @@ module Texting
 
     def process(method_name, *args) #:nodoc:
       payload = {
-        texter: self.class.name,
+        messenger: self.class.name,
         action: method_name,
         args: args
       }

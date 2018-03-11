@@ -1,13 +1,13 @@
 require "active_job/arguments"
 
-class DelayedTexterError < StandardError; end
+class DelayedMessengerError < StandardError; end
 
-class DelayedTexter < Texting::Base
+class DelayedMessenger < Texting::Base
   cattr_accessor :last_error
   cattr_accessor :last_rescue_from_instance
 
   if ActiveSupport::VERSION::MAJOR > 4
-    rescue_from DelayedTexterError do |error|
+    rescue_from DelayedMessengerError do |error|
       @@last_error = error
       @@last_rescue_from_instance = self
     end

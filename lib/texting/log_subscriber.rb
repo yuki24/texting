@@ -26,10 +26,10 @@ module Texting
       return unless logger.debug?
 
       debug do
-        texter = event.payload[:texter]
+        messenger = event.payload[:messenger]
         action = event.payload[:action]
 
-        "#{texter}##{action}: processed outbound text message in #{event.duration.round(1)}ms"
+        "#{messenger}##{action}: processed outbound text message in #{event.duration.round(1)}ms"
       end
     end
 

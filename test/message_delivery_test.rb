@@ -1,6 +1,6 @@
 require 'test_helper'
 require 'active_job'
-require 'texters/delayed_texter'
+require 'messengers/delayed_messenger'
 
 class MessageDeliveryTest < ActiveSupport::TestCase
   include ActiveJob::TestHelper
@@ -14,18 +14,18 @@ class MessageDeliveryTest < ActiveSupport::TestCase
     ActiveJob::Base.queue_adapter.perform_enqueued_at_jobs = true
     ActiveJob::Base.queue_adapter.perform_enqueued_jobs = true
 
-    DelayedTexter.last_error = nil
-    DelayedTexter.last_rescue_from_instance = nil
+    DelayedMessenger.last_error = nil
+    DelayedMessenger.last_rescue_from_instance = nil
 
-    @message = Texting::MessageDelivery.new(BaseTexter, :welcome, args: "value")
+    @message = Texting::MessageDelivery.new(BaseMessenger, :welcome, args: "value")
   end
 
   teardown do
     ActiveJob::Base.logger = @previous_logger
     Texting::Base.deliver_later_queue_name = @previous_deliver_later_queue_name
 
-    DelayedTexter.last_error = nil
-    DelayedTexter.last_rescue_from_instance = nil
+    DelayedMessenger.last_error = nil
+    DelayedMessenger.last_rescue_from_instance = nil
   end
 
   def test_should_enqueue_and_run_correctly_in_activejob
@@ -37,7 +37,7 @@ class MessageDeliveryTest < ActiveSupport::TestCase
 
   test "should enqueue the message with :deliver_now! delivery method" do
     args = [
-      "BaseTexter",
+      "BaseMessenger",
       "welcome",
       "deliver_now!",
       { args: "value" }
@@ -50,7 +50,7 @@ class MessageDeliveryTest < ActiveSupport::TestCase
 
   test "should enqueue a delivery with a delay" do
     args = [
-      "BaseTexter",
+      "BaseMessenger",
       "welcome",
       "deliver_now!",
       { args: "value" }
@@ -65,7 +65,7 @@ class MessageDeliveryTest < ActiveSupport::TestCase
 
   test "should enqueue a delivery at a specific time" do
     args = [
-      "BaseTexter",
+      "BaseMessenger",
       "welcome",
       "deliver_now!",
       { args: "value" }
@@ -79,7 +79,7 @@ class MessageDeliveryTest < ActiveSupport::TestCase
 
   test "can override the queue when enqueuing message" do
     args = [
-      "BaseTexter",
+      "BaseMessenger",
       "welcome",
       "deliver_now!",
       { args: "value" }
@@ -118,42 +118,42 @@ class MessageDeliveryTest < ActiveSupport::TestCase
   if ActiveSupport::VERSION::MAJOR > 4
     test "job delegates error handling to notifier" do
       # Superclass not rescued by notifier's rescue_from RuntimeError
-      message = DelayedTexter.test_raise("StandardError")
+      message = DelayedMessenger.test_raise("StandardError")
       assert_raise(StandardError) { message.deliver_later! }
-      assert_nil DelayedTexter.last_error
-      assert_nil DelayedTexter.last_rescue_from_instance
+      assert_nil DelayedMessenger.last_error
+      assert_nil DelayedMessenger.last_rescue_from_instance
 
       # Rescued by notifier's rescue_from RuntimeError
-      message = DelayedTexter.test_raise("DelayedTexterError")
+      message = DelayedMessenger.test_raise("DelayedMessengerError")
       assert_nothing_raised { message.deliver_later! }
-      assert_equal "boom", DelayedTexter.last_error.message
-      assert_kind_of DelayedTexter, DelayedTexter.last_rescue_from_instance
+      assert_equal "boom", DelayedMessenger.last_error.message
+      assert_kind_of DelayedMessenger, DelayedMessenger.last_rescue_from_instance
     end
 
     test "job delegates deserialization errors to notifier class" do
       # Inject an argument that can't be deserialized.
-      message = DelayedTexter.test_message(arg: DeserializationErrorFixture.new)
+      message = DelayedMessenger.test_message(arg: DeserializationErrorFixture.new)
 
       # DeserializationError is raised, rescued, and delegated to the handler
       # on the notifier class.
       assert_nothing_raised { message.deliver_later! }
-      assert_equal DelayedTexter, DelayedTexter.last_rescue_from_instance
-      assert_equal "Error while trying to deserialize arguments: boom, missing find", DelayedTexter.last_error.message
+      assert_equal DelayedMessenger, DelayedMessenger.last_rescue_from_instance
+      assert_equal "Error while trying to deserialize arguments: boom, missing find", DelayedMessenger.last_error.message
     end
   else
     test "job does not delegate error handling to notifier" do
-      message = DelayedTexter.test_raise("StandardError")
+      message = DelayedMessenger.test_raise("StandardError")
       assert_raise(StandardError) { message.deliver_later! }
-      assert_nil DelayedTexter.last_error
-      assert_nil DelayedTexter.last_rescue_from_instance
+      assert_nil DelayedMessenger.last_error
+      assert_nil DelayedMessenger.last_rescue_from_instance
 
-      message = DelayedTexter.test_raise("DelayedTexterError")
-      assert_raise(DelayedTexterError, /boom/) { message.deliver_later! }
+      message = DelayedMessenger.test_raise("DelayedMessengerError")
+      assert_raise(DelayedMessengerError, /boom/) { message.deliver_later! }
     end
 
     test "job does not delegate deserialization errors to notifier class" do
       # Inject an argument that can't be deserialized.
-      message = DelayedTexter.test_message(arg: DeserializationErrorFixture.new)
+      message = DelayedMessenger.test_message(arg: DeserializationErrorFixture.new)
 
       assert_raise(ActiveJob::DeserializationError) { message.deliver_later! }
     end
