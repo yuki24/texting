@@ -5,7 +5,7 @@ before_install: gem install bundler -v 1.15.4
 rvm:
   - 2.5.1
   - 2.4.4
-  - 2.2.10
+  - 2.3.7
   - ruby-head
   - jruby-9.1.16.0
   - jruby-head
@@ -25,6 +25,4 @@ matrix:
     - gemfile: gemfiles/rails_edge.gemfile
   exclude:
     - rvm: 2.3.7
-      gemfile: gemfiles/rails_edge.gemfile
-    - rvm: 2.2.10
       gemfile: gemfiles/rails_edge.gemfile
