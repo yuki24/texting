@@ -54,6 +54,38 @@ module Texting
         interceptors.flatten.compact.each { |interceptor| register_interceptor(interceptor) }
       end
 
+      class AfterDeliveryObserver
+        attr_reader :block
+
+        def initialize(block)
+          @block = block
+        end
+
+        def delivered_message(message, response)
+          block.call(message, response)
+        end
+      end
+
+      class BeforeDeliveryObserver
+        attr_reader :block
+
+        def initialize(block)
+          @block = block
+        end
+
+        def delivering_message(message, response)
+          block.call(message, response)
+        end
+      end
+
+      def after_delivery(&block)
+        register_observer AfterDeliveryObserver.new(block)
+      end
+
+      def before_delivery(&block)
+        register_interceptor BeforeDeliveryInterceptor.new(block)
+      end
+
       # Register an Observer which will be notified when a text message is delivered.
       # Either a class, string or symbol can be passed in as the Observer.
       # If a string or symbol is passed in it will be camelized and constantized.
