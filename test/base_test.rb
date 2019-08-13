@@ -107,6 +107,19 @@ class BaseTest < ActiveSupport::TestCase
     end
   end
 
+  test "you can use the #after_delivery hook to register an observer" do
+    message_side_effects do
+      val = false
+      Texting::Base.after_delivery do
+        val = true
+      end
+
+      BaseMessenger.welcome.deliver_now!
+
+      assert val, "#after_delivery hook not getting invoked"
+    end
+  end
+
   class MyInterceptor
     def self.delivering_message(message); end
     def self.previewing_message(message); end
@@ -138,6 +151,19 @@ class BaseTest < ActiveSupport::TestCase
           message.deliver_now!
         end
       end
+    end
+  end
+
+  test "you can use the #before_delivery hook to register an interceptor" do
+    message_side_effects do
+      val = false
+      Texting::Base.before_delivery do
+        val = true
+      end
+
+      BaseMessenger.welcome.deliver_now!
+
+      assert val, "#before_delivery hook not getting invoked"
     end
   end
 

@@ -66,15 +66,15 @@ module Texting
         end
       end
 
-      class BeforeDeliveryObserver
+      class BeforeDeliveryInterceptor
         attr_reader :block
 
         def initialize(block)
           @block = block
         end
 
-        def delivering_message(message, response)
-          block.call(message, response)
+        def delivering_message(message)
+          block.call(message)
         end
       end
 
