@@ -13,7 +13,7 @@ module Texting
 
       message = event.payload[:message]
       info do
-        "  #{colorize("SMS (#{event.duration.round(1)}ms)")}  #{colorize("Text message sent to #{message.to.first(5).strip}.***.**** from #{message.from.first(5).strip}.***.****", style: "0;1")}"
+        "  #{colorize("SMS (#{event.duration.round(1)}ms)")}  #{colorize("Text message sent to ***-#{message.to.last(4).strip} from ***-#{message.from.last(4).strip}", style: "0;1")}"
       end
 
       return unless logger.debug?

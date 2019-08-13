@@ -21,11 +21,11 @@ class LogSubscriberTest < ActiveSupport::TestCase
 
   def test_deliver_is_notified
     Texting::Base.logger.level = 0
-    BaseMessenger.welcome.deliver_now!
+    BaseMessenger.welcome(to: "347-123-4567").deliver_now!
     wait
 
     assert_equal(1, @logger.logged(:info).size)
-    assert_match(/#{LIGHT_GREEN}SMS \(\d+\.\d+ms\)#{NO_COLOR}  #{BOLD_WHITE}Text message sent to 909-3\.\*\*\*\.\*\*\*\* from 909-3\.\*\*\*\.\*\*\*\*#{NO_COLOR}/, @logger.logged(:info).first)
+    assert_match(/#{LIGHT_GREEN}SMS \(\d+\.\d+ms\)#{NO_COLOR}  #{BOLD_WHITE}Text message sent to \*\*\*-4567 from \*\*\*-0003#{NO_COLOR}/, @logger.logged(:info).first)
 
     assert_equal(2, @logger.logged(:debug).size)
     assert_match(/BaseMessenger#welcome: processed outbound text message in [\d.]+ms/, @logger.logged(:debug).first)
@@ -39,11 +39,11 @@ class LogSubscriberTest < ActiveSupport::TestCase
 
   def test_deliver_is_notified_in_info
     Texting::Base.logger.level = 1
-    BaseMessenger.welcome.deliver_now!
+    BaseMessenger.welcome(to: "347-123-4567").deliver_now!
     wait
 
     assert_equal(1, @logger.logged(:info).size)
-    assert_match(/#{LIGHT_GREEN}SMS \(\d+\.\d+ms\)#{NO_COLOR}  #{BOLD_WHITE}Text message sent to 909-3\.\*\*\*\.\*\*\*\* from 909-3\.\*\*\*\.\*\*\*\*#{NO_COLOR}/, @logger.logged(:info).first)
+    assert_match(/#{LIGHT_GREEN}SMS \(\d+\.\d+ms\)#{NO_COLOR}  #{BOLD_WHITE}Text message sent to \*\*\*-4567 from \*\*\*-0003#{NO_COLOR}/, @logger.logged(:info).first)
 
     assert_equal 0, @logger.logged(:debug).size
   ensure
