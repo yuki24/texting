@@ -198,7 +198,7 @@ module Texting
     def text(to: nil, body: nil)
       return message if message && to.nil && body.nil?
 
-      @_message = TextMessage.new(to: to, body: body, **self.class.default)
+      @_message = TextMessage.new(to: to, body: body.strip, **self.class.default)
     end
 
     ActiveSupport.run_load_hooks(:texting, self)
