@@ -18,7 +18,7 @@ module Texting
 
       return unless logger.debug?
       debug do
-        "  #{colorize("Message:")}\n    #{message.body}\n"
+        "  #{colorize("Message:")}  #{message.body}\n"
       end
     end
 

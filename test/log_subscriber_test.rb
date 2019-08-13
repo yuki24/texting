@@ -30,8 +30,7 @@ class LogSubscriberTest < ActiveSupport::TestCase
     assert_equal(2, @logger.logged(:debug).size)
     assert_match(/BaseMessenger#welcome: processed outbound text message in [\d.]+ms/, @logger.logged(:debug).first)
     assert_equal(<<-DEBUG_LOG.strip_heredoc.strip, @logger.logged(:debug).second)
-      \e[32;1mMessage:\e[0m
-          Welcome!
+      \e[32;1mMessage:\e[0m  Welcome!
     DEBUG_LOG
   ensure
     BaseMessenger.deliveries.clear
