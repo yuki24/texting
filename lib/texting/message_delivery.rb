@@ -2,6 +2,8 @@ require "delegate"
 
 module Texting
   class MessageDelivery < Delegator
+    attr_reader :messenger_class, :action, :args
+
     def initialize(messenger_class, action, *args) #:nodoc:
       @messenger_class, @action, @args = messenger_class, action, args
 
