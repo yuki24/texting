@@ -25,7 +25,7 @@ class LogSubscriberTest < ActiveSupport::TestCase
     wait
 
     assert_equal(1, @logger.logged(:info).size)
-    assert_match(/#{LIGHT_GREEN}SMS \(\d+\.\d+ms\)#{NO_COLOR} #{BOLD_WHITE}sent text message to 909-390-0003 from 909-390-0003#{NO_COLOR}/, @logger.logged(:info).first)
+    assert_match(/#{LIGHT_GREEN}SMS \(\d+\.\d+ms\)#{NO_COLOR}  #{BOLD_WHITE}Text message sent to 909-3\.\*\*\*\.\*\*\*\* from 909-3\.\*\*\*\.\*\*\*\*#{NO_COLOR}/, @logger.logged(:info).first)
 
     assert_equal(2, @logger.logged(:debug).size)
     assert_match(/BaseMessenger#welcome: processed outbound text message in [\d.]+ms/, @logger.logged(:debug).first)
@@ -43,7 +43,7 @@ class LogSubscriberTest < ActiveSupport::TestCase
     wait
 
     assert_equal(1, @logger.logged(:info).size)
-    assert_match(/#{LIGHT_GREEN}SMS \(\d+\.\d+ms\)#{NO_COLOR} #{BOLD_WHITE}sent text message to 909-390-0003 from 909-390-0003#{NO_COLOR}/, @logger.logged(:info).first)
+    assert_match(/#{LIGHT_GREEN}SMS \(\d+\.\d+ms\)#{NO_COLOR}  #{BOLD_WHITE}Text message sent to 909-3\.\*\*\*\.\*\*\*\* from 909-3\.\*\*\*\.\*\*\*\*#{NO_COLOR}/, @logger.logged(:info).first)
 
     assert_equal 0, @logger.logged(:debug).size
   ensure

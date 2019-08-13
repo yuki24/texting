@@ -1,5 +1,6 @@
 # frozen-string-literal: true
 
+require "active_support/core_ext/string/access"
 require "active_support/log_subscriber"
 
 module Texting
